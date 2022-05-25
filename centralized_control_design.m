@@ -10,3 +10,4 @@ min_torques = -[56 97 52 10 10 10];
 %Set up control parameters
 KP = 200
 KD = 50
+%This chnage
