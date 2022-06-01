@@ -28,9 +28,9 @@ DH_Mod = [t1 t2 t3 0 0 0];
 %Puma560_FK = simplify(Puma560.fkine(DH_Mod))
 
 %Robot Definition
-a2 = 0.4318; a3 = -0.0203; a6 = 0.1;
-d2=0.2435; d3 = -0.0934; %d3 = 0.1254; 
-d4 = 0.4331;
+% a2 = 0.4318; a3 = -0.0203; a6 = 0.1;
+% d2=0.2435; d3 = -0.0934; %d3 = 0.1254; 
+% d4 = 0.4331;
 
 L1 = Link('revolute','d', 0, 'a', 0,'alpha', 0, 'modified', 'qlim',[-2*pi,2*pi]);
 L2 = Link('revolute','d', d2, 'a', 0,'alpha', -pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
