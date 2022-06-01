@@ -9,7 +9,7 @@ q5 = q(5);
 q6 = q(6);
 
 %Robot Definition
-global a2 a3 a6 d2 d3 d4 
+global a2 a3 a6 d2 d3 d4
 
 L1 = Link('revolute','d', 0, 'a', 0,'alpha', 0, 'modified', 'qlim',[-2*pi,2*pi]);
 L2 = Link('revolute','d', d2, 'a', 0,'alpha', -pi/2, 'modified', 'qlim',[-2*pi,2*pi]);

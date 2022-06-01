@@ -48,3 +48,6 @@ g5 = -0.0282;
 M = inertia(config_i)
 N = nonlin(config_i,vel_i)
 T = fk(config_i)
+qcheck = ik(T);
+
+trajectory
