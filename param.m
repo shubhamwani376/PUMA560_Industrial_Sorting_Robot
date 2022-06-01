@@ -1,15 +1,15 @@
 clc; clear all;
 
-%DH params for robots
-a2 = 0.4318; a3 = -0.0203; a6 = 0.1;
-d2 = 0.2435; d3 = -0.0934; d4 = 0.4331; %taken from mdl_p560akb and MAE263B Final
-
 %Initial configuration
 config_i = [0 0 0 0 0 0]';
 vel_i = [0 0 0 0 0 0]';
 
 %Global varibales
-global I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I19 I20 I21 I22 I23 Im g1 g2 g3 g4 g5
+global a2 a3 a6 d2 d3 d4 I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I19 I20 I21 I22 I23 Im g1 g2 g3 g4 g5
+
+%DH params for robots
+a2 = 0.4318; a3 = -0.0203; a6 = 0.1;
+d2 = 0.2435; d3 = -0.0934; d4 = 0.4331; %taken from mdl_p560akb and MAE263B Final
 
 %Inertia constants in kg.m^2
 I1 = 1.43;
@@ -47,3 +47,4 @@ g5 = -0.0282;
 
 M = inertia(config_i)
 N = nonlin(config_i,vel_i)
+T = fk(config_i)
