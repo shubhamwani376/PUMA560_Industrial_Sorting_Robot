@@ -1,5 +1,6 @@
-function M_n = inertia(q)
-%Extracting from input matrix
+function M = inertia(q)
+
+% Extracting from input matrix
 q1 = q(1);
 q2 = q(2);
 q3 = q(3);
@@ -8,8 +9,7 @@ q5 = q(5);
 q6 = q(6);
 
 % Intertial constant reference (Kg.m^2)
-
-global I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I19 I20 I21 I22 I23 Im
+global I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I19 I20 I21 I22 I23 Im g1 g2 g3 g4 g5
 
 % Inertia matrix elements
 M11 = Im(1)+I1+(I3*cos(q2)*cos(q2))+(I7*sin(q2+q3)*sin(q2+q3))+(I10*sin(q2+q3)*cos(q2+q3))+(I11*sin(q2)*cos(q2))+(I21*sin(q2+q3)*sin(q2+q3))+2+(I5*cos(q2)*sin(q2+q3))+(I12*cos(q2)*cos(q2+q3))+(I15*sin(q2+q3)*sin(q2+q3))+(I16*cos(q2)*sin(q2+q3))+(I22*sin(q2+q3)*cos(q2+q3));
@@ -46,8 +46,6 @@ M = [M11 M12 M13 0 0 0;
     0 0 0 M44 0 0;
     0 0 0 0 M55 0;
     0 0 0 0 0 M66];
-
-M_n = M;
 
 end
 
