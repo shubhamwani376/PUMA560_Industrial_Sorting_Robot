@@ -45,6 +45,9 @@ g3 = 1.02;
 g4 = 0.249;
 g5 = -0.0282;
 
+F_v=zeros(6,6);
+
+
 M = inertia(config_i)
 N = nonlin(config_i,vel_i)
 T_config = fk(config_i)

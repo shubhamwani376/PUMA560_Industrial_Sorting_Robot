@@ -8,6 +8,7 @@ wp=[ x_home+0.1,y_home,z_home;
     x_home+0.1,y_home+0.1,z_home;
     x_home,y_home+0.1,z_home;
     x_home,y_home,z_home];
+
 tseg = [10,10,10,10];
 tacc = tseg(1)/10;
 trajtime = linspace(0,40,400);
