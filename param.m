@@ -1,8 +1,8 @@
 clc; clear all;
 
 %Initial configuration
-config_i = [0 0 0 0 0 0]';
-vel_i = [0 0 0 0 0 0]';
+% config_i = [0 0 0 0 0 0]';
+% vel_i = [0 0 0 0 0 0]';
 
 %Global varibales
 global a2 a3 a6 d2 d3 d4 I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I19 I20 I21 I22 I23 Im g1 g2 g3 g4 g5
@@ -10,6 +10,13 @@ global a2 a3 a6 d2 d3 d4 I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 
 %DH params for robots
 a2 = 0.4318; a3 = -0.0203; a6 = 0.1;
 d2 = 0.2435; d3 = -0.0934; d4 = 0.4331; %taken from mdl_p560akb and MAE263B Final
+
+K_p = diag([200 200 200 200 200 200]);
+K_d = diag([50 50 50 50 50 50]);
+F_v = zeros(6,6);
+
+max_torques = [56 97 52 10 10 10]';
+min_torques = -[56 97 52 10 10 10]';
 
 %Inertia constants in kg.m^2
 I1 = 1.43;
@@ -45,12 +52,59 @@ g3 = 1.02;
 g4 = 0.249;
 g5 = -0.0282;
 
-M = inertia(config_i)
-N = nonlin(config_i,vel_i)
-T_config = fk(config_i)
-qcheck = ik(T_config);
+%Test
+% M = inertia(config_i)
+% N = nonlin(config_i,vel_i)
+% T = fk(config_i)
 
-%[x_d,dx_d,ddx_d,trajtime] = trajectory(T_config);
-[q_d,dq_d,ddq_d,trajtime] = trajectory(T_config);
-K_p= 1000.*eye(6,6);
-K_d= 200.*eye(6,6);
+%Trajectory inputs
+x_h=0.4115; y_h=0.1501; z_h=0.4331; 
+
+x0=[x_h,y_h,z_h]; % home position
+T0 = [1 0 0 x_h;
+    0 1 0 y_h;
+    0 0 1 z_h;
+    0 0 0 1];
+q0 = (ik(T0))';
+
+wp=[ x_h+0.1,y_h,z_h;
+    x_h+0.1,y_h+0.1,z_h;
+    x_h,y_h+0.1,z_h;
+    x_h,y_h,z_h];
+
+dt = 0.1;
+tf = 40;
+
+%Trajectory
+[t,x_d,dx_d,ddx_d] = traj(x0,wp,dt,tf);
+
+for i = 1:length(t)
+    T = [1 0 0 x_d(i,1);
+        0 1 0 x_d(i,2);
+        0 0 1 x_d(i,3);
+        0 0 0 1];
+    q_d(i,:) = ik(T);
+%     J = p560.jacob0(q_d(i,:));
+%     v = (q_d(i,:))';
+%     test = (inv(J)*(v))';
+end
+
+for i = 1:length(t)-1
+    dq_d(i,:) = (q_d(i+1,:)-q_d(i,:))/dt;
+end
+
+dq_d(length(t),:) = [0 0 0 0 0 0];
+
+for i = 1:length(t)-1
+    ddq_d(i,:) = (dq_d(i+1,:)-dq_d(i,:))/dt;
+end
+
+ddq_d(length(t),:) = [0 0 0 0 0 0];
+
+
+% Inputs for simulink model
+pos_traj = [t', q_d];
+vel_traj = [t', dq_d];
+acc_traj = [t', ddq_d];
+
+out = sim("InverseDynamicsController",tf);
