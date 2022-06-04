@@ -54,8 +54,10 @@ g5 = -0.0282;
 
 
 F_v=zeros(6,6);
-
-
+config_i =[0,0,0,0,0,0];
+vel_i = [0,0,0,0,0,0];
+q_i=config_i;
+dq_i=vel_i;
 M = inertia(config_i)
 N = nonlin(config_i,vel_i)
 T_config = fk(config_i)
@@ -117,4 +119,6 @@ pos_traj = [t', q_d];
 vel_traj = [t', dq_d];
 acc_traj = [t', ddq_d];
 
+K_p = 1000*eye(6,6)
+K_d = 200*eye(6,6)
 %out = sim("InverseDynamicsController",tf);
