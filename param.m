@@ -52,7 +52,7 @@ g3 = 1.02;
 g4 = 0.249;
 g5 = -0.0282;
 
-<<<<<<< HEAD
+
 F_v=zeros(6,6);
 
 
@@ -60,12 +60,12 @@ M = inertia(config_i)
 N = nonlin(config_i,vel_i)
 T_config = fk(config_i)
 qcheck = ik(T_config);
-=======
+
 %Test
 % M = inertia(config_i)
 % N = nonlin(config_i,vel_i)
 % T = fk(config_i)
->>>>>>> 2b3fcee79a64914e9e1cd38f33c556c94f34f644
+
 
 %Trajectory inputs
 x_h=0.4115; y_h=0.1501; z_h=0.4331; 
@@ -117,4 +117,4 @@ pos_traj = [t', q_d];
 vel_traj = [t', dq_d];
 acc_traj = [t', ddq_d];
 
-out = sim("InverseDynamicsController",tf);
+%out = sim("InverseDynamicsController",tf);
