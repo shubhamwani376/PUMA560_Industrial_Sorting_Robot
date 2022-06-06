@@ -9,8 +9,32 @@ q5 = q(5);
 q6 = q(6);
 
 % Intertial constant reference (Kg.m^2)
-global I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I19 I20 I21 I22 I23 Im g1 g2 g3 g4 g5
+% global I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I19 I20 I21 I22 I23 Im g1 g2 g3 g4 g5
+I1 = 1.43;
+I2 = 1.75;
+I3 = 1.38;
+I4 = 0.69;
+I5 = 0.372;
+I6 = 0.333;
+I7 = 0.298;
+I8 = -0.134;
+I9 = 0.0238;
+I10 = -0.0213;
+I11 = -0.0142;
+I12 = -0.011;
+I13 = -0.00379;
+I14 = 0.00164;
+I15 = 0.00125;
+I16 = 0.00124;
+I17 = 0.000642;
+I18 = 0.000431;
+I19 = 0.0003;
+I20 = -0.000202;
+I21 = -0.0001;
+I22 = -0.000058;
+I23 = 0.00004;
 
+Im = [ 1.14 4.71 0.827 0.2 0.179 0.193 ];
 % Inertia matrix elements
 M11 = Im(1)+I1+(I3*cos(q2)*cos(q2))+(I7*sin(q2+q3)*sin(q2+q3))+(I10*sin(q2+q3)*cos(q2+q3))+(I11*sin(q2)*cos(q2))+(I21*sin(q2+q3)*sin(q2+q3))+2+(I5*cos(q2)*sin(q2+q3))+(I12*cos(q2)*cos(q2+q3))+(I15*sin(q2+q3)*sin(q2+q3))+(I16*cos(q2)*sin(q2+q3))+(I22*sin(q2+q3)*cos(q2+q3));
 
