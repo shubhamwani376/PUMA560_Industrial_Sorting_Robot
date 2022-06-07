@@ -29,5 +29,5 @@ while (count<50)
     hold off;
     count=count+1;
 end
-set(gca, 'Visible', 'off')
-exportgraphics(gcf,'conveyer.png','Resolution',50,'BackgroundColor','black','ContentType','image')
+% set(gca, 'Visible', 'off')
+% exportgraphics(gcf,'conveyer.png','Resolution',50,'BackgroundColor','black','ContentType','image')
