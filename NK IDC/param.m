@@ -1,28 +1,24 @@
 clc; clear all;
 
-%Initial configuration
+% Initial configuration
 % config_i = [0 0 0 0 0 0]';
 % vel_i = [0 0 0 0 0 0]';
 
-%Global varibales
+% Global varibales
 global a2 a3 a6 d2 d3 d4 I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I19 I20 I21 I22 I23 Im g1 g2 g3 g4 g5
 
-%DH params for robots
+% DH params for robots
 a2 = 0.4318; a3 = -0.0203; a6 = 0.1;
-d2 = 0.2435; d3 = -0.0934; d4 = 0.4331; %taken from mdl_p560akb and MAE263B Final
+d2 = 0.2435; d3 = -0.0934; d4 = 0.4331;
 
-K_p = diag([200 200 200 200 200 200]);
-K_d = diag([50 50 50 50 50 50]);
-F_v = zeros(6,6);
-
+% Torque limits
 max_torques = [97.6 186.4 89.4 24.2 20.1 21.3]';
 min_torques = -[97.6 186.4 89.4 24.2 20.1 21.3]';
 
+% Friction Matrix
+F_v = zeros(6,6);
 
-% max_torques = [56 97 52 10 10 10]';
-% min_torques = -[56 97 52 10 10 10]';
-
-%Inertia constants in kg.m^2
+% Inertia constants in kg.m^2
 I1 = 1.43;
 I2 = 1.75;
 I3 = 1.38;
@@ -56,32 +52,88 @@ g3 = 1.02;
 g4 = 0.249;
 g5 = -0.0282;
 
-%Test
-% M = inertia(config_i)
-% N = nonlin(config_i,vel_i)
-% T = fk(config_i)
+% Gain Matrices
+K_p = diag([200 200 200 200 200 200]);
+K_d = diag([50 50 50 50 50 50]);
 
-%Trajectory inputs
-x_h=0.4115; y_h=0.1501; z_h=0.4331; 
+% Trajectory inputs
+dt = 0.1; % time step
+x_0 = 0.4115; y_0 = 0.1501; z_0 = 0.4331; 
 
-x0=[x_h,y_h,z_h]; % home position
-T0 = [1 0 0 x_h;
-    0 1 0 y_h;
-    0 0 1 z_h;
+x0=[x_0,y_0,z_0]; % home position
+T0 = [1 0 0 x_0;
+    0 1 0 y_0;
+    0 0 1 z_0;
     0 0 0 1];
 q0 = (ik(T0))';
 
-wp=[ x_h+0.1,y_h,z_h;
-    x_h+0.1,y_h+0.1,z_h;
-    x_h,y_h+0.1,z_h;
-    x_h,y_h,z_h];
+% Conveyor - Grasp start
+x_s = -0.3; y_s = 0.5; z_s = 0.35;
+xs=[x_s,y_s,z_s];
 
-dt = 0.1;
-tf = 40;
+% Phase 1 - Home to conveyor trajectory
+tf_i = 1.5; % total time
+wp_i=[x_0-0.2,y_0+0.2,z_s;
+    x_0-0.4,y_s,z_s;
+    x_s,y_s,z_s];
 
-%Trajectory
-[t,x_d,dx_d,ddx_d] = traj(x0,wp,dt,tf);
+tseg_i = [0.5,0.5,0.5]; % time per segment
 
+[t_i,xi_d,dxi_d,ddxi_d] = traj(x0,wp_i,dt,tf_i,tseg_i);
+
+t1 = t_i; % time stamps
+
+% Conveyor - Grasp end
+x_e = 0.3; y_e = 0.5; z_e = 0.35;
+xe=[x_e,y_e,z_e];
+
+% Phase 2 - Conveyor pickup trajectory
+tf_c = 2; % total time
+wp_c=[x_s+0.3,y_s,z_s;
+    x_e,y_e,z_e];
+tseg_c = [1,1]; % time per segment
+
+[t_c,xc_d,dxc_d,ddxc_d] = traj(xs,wp_c,dt,tf_c,tseg_c);
+
+t2 = tf_i + t_c; % time stamps
+
+% Place point
+x_f = 0.4; y_f = -0.3; z_f = z_0;
+xf=[x_f,y_f,z_f];
+
+% Phase 3 - Conveyor to station placing trajectory
+tf_p = 2; % total time
+wp_p=[x_f,y_e-0.2,z_f;
+    x_f,y_e-0.4,z_f;
+    x_f,y_e-0.6,z_f;
+    x_f,y_f,z_f];
+
+tseg_p = [0.5,0.5,0.5,0.5]; % time per segment
+
+[t_p,xp_d,dxp_d,ddxp_d] = traj(xe,wp_p,dt,tf_p,tseg_p);
+
+t3 = tf_i + tf_c + t_p; % time stamps
+
+% Phase 4 - Place station to home trajectory
+tf_f = 0.5; % total time
+wp_f=[x_0,y_0,z_0]; 
+tseg_f = [0.5]; % time per segment
+
+[t_f,xf_d,dxf_d,ddxf_d] = traj(xf,wp_f,dt,tf_f,tseg_f);
+
+t4 = tf_i + tf_c + tf_p + t_f; % time stamps
+
+% Combined trajectory data
+t_temp = [t1, t2, t3, t4];
+
+% Desired trajectory data points
+x_d = [xi_d; xc_d; xp_d; xf_d];
+
+t = t_temp(1:54);
+
+tf = (tf_i + tf_c + tf_p +tf_f) - 0.6; %simulating till 5.4 s
+
+% Desired Joint Configurations
 for i = 1:length(t)
     T = [1 0 0 x_d(i,1);
         0 1 0 x_d(i,2);
@@ -105,19 +157,63 @@ end
 
 ddq_d(length(t),:) = [0 0 0 0 0 0];
 
-
-% Inputs for simulink model
+% Simulink model inputs
 pos_traj = [t', q_d];
 vel_traj = [t', dq_d];
 acc_traj = [t', ddq_d];
 
-% figure('Name','EE Trajectory plot');
-% plot(x_d(:,1),x_d(:,2))
-% 
-% figure('Name','EE Velocity');
-% plot(dx_d(:,1),dx_d(:,2))
-% 
-% figure('Name','EE Acceleration');
-% plot(ddx_d(:,1),ddx_d(:,2))
-
+% Controller Simulation
 out = sim("InverseDynamicsController",tf);
+
+% Output Data
+q_a = [out.JointPosition.Data(1,:); out.JointPosition.Data(2,:); out.JointPosition.Data(3,:); out.JointPosition.Data(4,:); out.JointPosition.Data(5,:); out.JointPosition.Data(6,:)];
+Q_a = (q_a)'; % for trajectory with robot
+
+% Actual trajectory data points
+for i = 1:length(q_a)
+    T_a = fk(q_a(:,i));
+    [R_traj,P] = tr2rt(T_a);
+    P_a(:,i) = P;
+end
+
+% Trajectory plots
+figure('Name','EE trajectories');
+plot3(x_d(:,1),x_d(:,2),x_d(:,3),'Color',[1 0 0]); % desired trajectory
+hold on;
+grid on;
+plot3(P_a(1,:),P_a(2,:),P_a(3,:),'Color',[0 1 0]); % actual trajectory
+legend('Desired Trajectory', 'Actual Trajectory');
+
+% % Trajectory with Robot
+% % Robot Definition
+% L1 = Link('revolute','d', 0, 'a', 0,'alpha', 0, 'modified', 'qlim',[-2*pi,2*pi]);
+% L2 = Link('revolute','d', d2, 'a', 0,'alpha', -pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
+% L3 = Link('revolute','d', d3, 'a', a2,'alpha', 0, 'modified', 'qlim',[-2*pi,2*pi]);
+% L4 = Link('revolute','d', d4, 'a', a3,'alpha', pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
+% L5 = Link('revolute','d', 0, 'a', 0,'alpha', -pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
+% L6 = Link('revolute','d', 0, 'a', 0,'alpha', pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
+% 
+% Puma560 = SerialLink([L1 L2 L3 L4 L5 L6],'name','Puma560');
+% 
+% % % Initialize video
+% % % RobotTrajectory_Video = VideoWriter('RobotTrajectory_Video','MPEG-4');
+% % % RobotTrajectory_Video.FrameRate = 10;
+% % % open(RobotTrajectory_Video)
+% % 
+% figure('Name','Trajectory with robot');
+% for i = 1 : 493
+%     Puma560.plot(Q_a(i,:),'scale',0.5);
+%     xlim([-1.5,1.5]); ylim([-1.5,1.5]); zlim([-1.5,1.5]);
+%     T_temp = Puma560.fkine(Q_a(i,:));
+%     [R_traj, P_traj] = tr2rt(T_temp);
+%     plot3(P_traj(1),P_traj(2),P_traj(3),'g*','MarkerSize',2); 
+%     hold on;
+%     view(3); 
+%     grid on;
+% % 
+% % %     frame = getframe(gcf); %get frame
+% % %     writeVideo(RobotTrajectory_Video, frame);
+% % 
+% end
+% hold off;
+% close(RobotTrajectory_Video);
