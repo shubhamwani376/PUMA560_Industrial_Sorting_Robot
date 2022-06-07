@@ -58,7 +58,7 @@ K_d = diag([40 40 40 40 40 40]);
 
 % Trajectory inputs
 dt = 0.1; % time step
-x_0 = 0.4115; y_0 = 0.1501; z_0 = 0.4331; 
+x_0 = 0.4115; y_0 = 0.1501; z_0 = 0.4331;
 
 x0=[x_0,y_0,z_0]; % home position
 T0 = [1 0 0 x_0;
@@ -116,7 +116,7 @@ t3 = tf_i + tf_c + t_p; % time stamps
 
 % Phase 4 - Place station to home trajectory
 tf_f = 1; % total time
-wp_f=[x_0,y_0,z_0]; 
+wp_f=[x_0,y_0,z_0];
 tseg_f = [1]; % time per segment
 
 [t_f,xf_d,dxf_d,ddxf_d] = traj(xf,wp_f,dt,tf_f,tseg_f);
@@ -127,9 +127,9 @@ t4 = tf_i + tf_c + tf_p + t_f; % time stamps
 t_temp = [t1, t2, t3, t4];
 
 % Desired trajectory data points
-x_d = [xi_d; xc_d; xp_d; xf_d];
+x_d = [x0; xi_d; xc_d; xp_d; xf_d];
 
-t = t_temp(1:94);
+t = t_temp(1:95);
 
 tf = (tf_i + tf_c + tf_p +tf_f) - 0.6; %simulating till 9.4 s
 
@@ -140,9 +140,9 @@ for i = 1:length(t)
         0 0 1 x_d(i,3);
         0 0 0 1];
     q_d(i,:) = ik(T);
-%     J = p560.jacob0(q_d(i,:));
-%     v = (q_d(i,:))';
-%     test = (inv(J)*(v))';
+    %     J = p560.jacob0(q_d(i,:));
+    %     v = (q_d(i,:))';
+    %     test = (inv(J)*(v))';
 end
 
 for i = 1:length(t)-1
@@ -191,6 +191,9 @@ plot(t(1,:),x_d(:,1),'Color',[1 0 0]);
 hold on;
 grid on;
 plot(out.Time.Data(:,1),P_a(1,:),'Color',[0 1 0]);
+xline(3,'--k','Phase 1');
+xline(5,'--k','Phase 2');
+xline(9,'--k','Phase 3');
 legend('Desired Trajectory', 'Actual Trajectory');
 
 % Y-Direction
@@ -199,6 +202,9 @@ plot(t(1,:),x_d(:,2),'Color',[1 0 0]);
 hold on;
 grid on;
 plot(out.Time.Data(:,1),P_a(2,:),'Color',[0 1 0]);
+xline(3,'--k','Phase 1');
+xline(5,'--k','Phase 2');
+xline(9,'--k','Phase 3');
 legend('Desired Trajectory', 'Actual Trajectory');
 
 % Z-Direction
@@ -207,39 +213,40 @@ plot(t(1,:),x_d(:,3),'Color',[1 0 0]);
 hold on;
 grid on;
 plot(out.Time.Data(:,1),P_a(3,:),'Color',[0 1 0]);
+xline(3,'--k','Phase 1');
+xline(5,'--k','Phase 2');
+xline(9,'--k','Phase 3');
 legend('Desired Trajectory', 'Actual Trajectory');
+hold off;
 
+% Trajectory with Robot
+% Robot Definition
+L1 = Link('revolute','d', 0, 'a', 0,'alpha', 0, 'modified', 'qlim',[-2*pi,2*pi]);
+L2 = Link('revolute','d', d2, 'a', 0,'alpha', -pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
+L3 = Link('revolute','d', d3, 'a', a2,'alpha', 0, 'modified', 'qlim',[-2*pi,2*pi]);
+L4 = Link('revolute','d', d4, 'a', a3,'alpha', pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
+L5 = Link('revolute','d', 0, 'a', 0,'alpha', -pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
+L6 = Link('revolute','d', 0, 'a', 0,'alpha', pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
 
-% % Trajectory with Robot
-% % Robot Definition
-% L1 = Link('revolute','d', 0, 'a', 0,'alpha', 0, 'modified', 'qlim',[-2*pi,2*pi]);
-% L2 = Link('revolute','d', d2, 'a', 0,'alpha', -pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
-% L3 = Link('revolute','d', d3, 'a', a2,'alpha', 0, 'modified', 'qlim',[-2*pi,2*pi]);
-% L4 = Link('revolute','d', d4, 'a', a3,'alpha', pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
-% L5 = Link('revolute','d', 0, 'a', 0,'alpha', -pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
-% L6 = Link('revolute','d', 0, 'a', 0,'alpha', pi/2, 'modified', 'qlim',[-2*pi,2*pi]);
-% 
-% Puma560 = SerialLink([L1 L2 L3 L4 L5 L6],'name','Puma560');
-% 
-% % % Initialize video
-% % % RobotTrajectory_Video = VideoWriter('RobotTrajectory_Video','MPEG-4');
-% % % RobotTrajectory_Video.FrameRate = 10;
-% % % open(RobotTrajectory_Video)
-% % 
-% figure('Name','Trajectory with robot');
-% for i = 1 : 493
-%     Puma560.plot(Q_a(i,:),'scale',0.5);
-%     xlim([-1.5,1.5]); ylim([-1.5,1.5]); zlim([-1.5,1.5]);
-%     T_temp = Puma560.fkine(Q_a(i,:));
-%     [R_traj, P_traj] = tr2rt(T_temp);
-%     plot3(P_traj(1),P_traj(2),P_traj(3),'g*','MarkerSize',2); 
-%     hold on;
-%     view(3); 
-%     grid on;
-% % 
-% % %     frame = getframe(gcf); %get frame
-% % %     writeVideo(RobotTrajectory_Video, frame);
-% % 
-% end
+Puma560 = SerialLink([L1 L2 L3 L4 L5 L6],'name','Puma560');
+
+% Initialize video
+% RobotTrajectory_Video = VideoWriter('RobotTrajectory_Video','MPEG-4');
+% RobotTrajectory_Video.FrameRate = 10;
+% open(RobotTrajectory_Video)
+
+figure('Name','Trajectory with robot');
+for i = 1 : length(Q_a)
+    Puma560.plot(Q_a(i,:),'scale',0.5);
+    T_temp = Puma560.fkine(Q_a(i,:));
+    [R_traj, P_traj] = tr2rt(T_temp);
+    plot3(P_traj(1),P_traj(2),P_traj(3),'g*','MarkerSize',2);
+    hold on;
+    view(3);
+    grid on;
+    %     frame = getframe(gcf); %get frame
+    %     writeVideo(RobotTrajectory_Video, frame);
+
+end
 % hold off;
 % close(RobotTrajectory_Video);
